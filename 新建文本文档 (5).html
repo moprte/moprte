@@ -1,0 +1,1313 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>moprte · 主页</title>
+<style>
+  :root{
+    --glass: rgba(16,20,28,.55);
+    --glass-strong: rgba(16,20,28,.92);
+    --line: rgba(255,255,255,.16);
+    --line-soft: rgba(255,255,255,.09);
+    --text: #f2f6fb;
+    --muted: rgba(255,255,255,.62);
+    --accent: #4f9cf9;
+    --accent-2: #2f7ce0;
+    --radius: 999px;
+  }
+  *{ box-sizing: border-box; }
+  html,body{ height:100%; }
+  body{
+    margin:0;
+    font-family:"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",system-ui,-apple-system,sans-serif;
+    color:var(--text);
+    overflow-x:hidden;
+    -webkit-font-smoothing:antialiased;
+  }
+  body.locked{ overflow:hidden; }
+
+  /* ---------- 背景 ---------- */
+  .bg{
+    position:fixed; inset:0; z-index:-2;
+    background-image: linear-gradient(135deg,#11212d 0%,#1b3444 45%,#2b5266 100%);
+    background-size:cover; background-position:center;
+    transition: opacity .8s ease;
+  }
+  .shade{
+    position:fixed; inset:0; z-index:-1;
+    background:
+      linear-gradient(180deg, rgba(0,0,0,.45) 0%, rgba(0,0,0,.12) 35%, rgba(0,0,0,.62) 100%),
+      radial-gradient(ellipse at 50% 45%, rgba(0,0,0,.10), rgba(0,0,0,.42));
+  }
+
+  /* ---------- 顶栏 ---------- */
+  header{
+    position:fixed; top:0; left:0; right:0; z-index:20;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:16px 26px;
+    pointer-events:none;
+  }
+  header > *{ pointer-events:auto; }
+  .logo{
+    font-size:21px; font-weight:700; letter-spacing:.6px;
+    text-shadow:0 2px 12px rgba(0,0,0,.5);
+    display:flex; align-items:center; gap:8px;
+  }
+  .logo .dot{ color:var(--accent); }
+  .top-right{ display:flex; align-items:center; gap:12px; }
+  .clock{
+    font-size:13px; color:var(--muted); font-variant-numeric:tabular-nums;
+    text-shadow:0 1px 8px rgba(0,0,0,.5);
+    display:flex; flex-direction:column; align-items:flex-end; line-height:1.35;
+  }
+  .clock b{ font-size:17px; font-weight:600; color:#fff; letter-spacing:.5px; }
+  .icon-btn{
+    width:38px; height:38px; border-radius:50%;
+    display:inline-flex; align-items:center; justify-content:center;
+    background:rgba(255,255,255,.1);
+    border:1px solid var(--line);
+    color:var(--text);
+    cursor:pointer;
+    backdrop-filter:blur(10px);
+    -webkit-backdrop-filter:blur(10px);
+    transition:.22s;
+  }
+  .icon-btn:hover{ background:rgba(255,255,255,.2); transform:rotate(35deg); }
+  .icon-btn svg{ width:19px; height:19px; }
+
+  /* ---------- 主体 ---------- */
+  main{
+    min-height:100vh;
+    display:flex; align-items:center; justify-content:center;
+    padding:90px 20px 60px;
+  }
+  .center{ width:100%; max-width:760px; text-align:center; }
+
+  .wordmark{
+    font-size:clamp(38px,7vw,58px);
+    font-weight:800;
+    letter-spacing:-1.5px;
+    margin:0 0 6px;
+    text-shadow:0 6px 30px rgba(0,0,0,.45);
+    background:linear-gradient(180deg,#ffffff,#cfe3f7);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  .wordmark .dot{ -webkit-text-fill-color:var(--accent); color:var(--accent); }
+  .tagline{
+    margin:0 0 30px;
+    color:var(--muted);
+    font-size:14px;
+    letter-spacing:2px;
+    text-shadow:0 1px 10px rgba(0,0,0,.5);
+  }
+
+  /* 打开搜索的胶囊按钮 */
+  .start-search{
+    display:inline-flex; align-items:center; gap:11px;
+    height:52px; padding:0 20px 0 18px;
+    border-radius:var(--radius);
+    background:var(--glass);
+    border:1px solid var(--line);
+    color:var(--text);
+    font-size:15px; font-family:inherit; font-weight:500;
+    cursor:pointer;
+    backdrop-filter:blur(20px) saturate(150%);
+    -webkit-backdrop-filter:blur(20px) saturate(150%);
+    box-shadow:0 12px 40px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.08);
+    transition:.2s;
+  }
+  .start-search:hover{
+    background:rgba(255,255,255,.16);
+    transform:translateY(-2px);
+    border-color:rgba(79,156,249,.6);
+    box-shadow:0 16px 44px rgba(0,0,0,.4), 0 0 0 4px rgba(79,156,249,.12);
+  }
+  .start-search:active{ transform:translateY(0) scale(.985); }
+  .start-search .ss-ico{ width:19px; height:19px; opacity:.75; }
+  .start-search kbd{
+    font-family:inherit; font-size:11.5px;
+    background:rgba(255,255,255,.12);
+    border:1px solid rgba(255,255,255,.18);
+    padding:2px 8px; border-radius:6px;
+    color:rgba(255,255,255,.65);
+  }
+
+  /* ---------- 快捷入口 ---------- */
+  .chips{
+    margin-top:26px;
+    display:flex; flex-wrap:wrap; gap:9px; justify-content:center;
+  }
+  .chip{
+    display:inline-flex; align-items:center; gap:6px;
+    padding:7px 14px;
+    border-radius:var(--radius);
+    background:rgba(255,255,255,.09);
+    border:1px solid var(--line-soft);
+    color:rgba(255,255,255,.85);
+    font-size:13px;
+    text-decoration:none;
+    backdrop-filter:blur(8px);
+    -webkit-backdrop-filter:blur(8px);
+    transition:.18s;
+  }
+  .chip:hover{
+    background:rgba(255,255,255,.2);
+    color:#fff;
+    transform:translateY(-2px);
+  }
+  .chip i{ font-style:normal; font-size:13px; opacity:.9; }
+
+  /* =========================================================
+     搜索窗口（点击后才出现，不常驻主页）
+     ========================================================= */
+  .search-overlay{
+    position:fixed; inset:0; z-index:120;
+    background:rgba(4,8,14,.5);
+    backdrop-filter:blur(9px);
+    -webkit-backdrop-filter:blur(9px);
+    display:flex; align-items:flex-start; justify-content:center;
+    padding:14vh 20px 40px;
+    opacity:0; visibility:hidden;
+    transition: opacity .22s ease, visibility .22s ease;
+  }
+  .search-overlay.open{ opacity:1; visibility:visible; }
+  .search-shell{
+    position:relative;
+    width:100%; max-width:720px;
+    transform: translateY(-14px) scale(.985);
+    transition: transform .26s cubic-bezier(.2,.8,.25,1);
+  }
+  .search-overlay.open .search-shell{ transform:none; }
+
+  .searchbox{
+    display:flex; align-items:center; gap:8px;
+    height:58px;
+    padding:0 8px 0 18px;
+    border-radius:var(--radius);
+    background:var(--glass-strong);
+    border:1px solid var(--line);
+    backdrop-filter:blur(24px) saturate(150%);
+    -webkit-backdrop-filter:blur(24px) saturate(150%);
+    box-shadow:0 18px 50px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.08);
+    transition:border-color .2s, box-shadow .2s;
+  }
+  .searchbox:focus-within{
+    border-color:rgba(79,156,249,.75);
+    box-shadow:0 20px 56px rgba(0,0,0,.55), 0 0 0 4px rgba(79,156,249,.14);
+  }
+  .ico-search{
+    width:20px; height:20px; flex:0 0 auto;
+    color:rgba(255,255,255,.6);
+  }
+  #q{
+    flex:1 1 auto; min-width:0;
+    height:100%;
+    background:transparent; border:none; outline:none;
+    color:var(--text);
+    font-size:16.5px;
+    font-family:inherit;
+  }
+  #q::placeholder{ color:rgba(255,255,255,.48); }
+
+  /* 引擎选择 */
+  .engine{ position:relative; flex:0 0 auto; }
+  .engine-btn{
+    display:flex; align-items:center; gap:6px;
+    height:38px; padding:0 10px;
+    border-radius:var(--radius);
+    background:rgba(255,255,255,.08);
+    border:1px solid var(--line-soft);
+    color:var(--text);
+    font-size:13px; font-family:inherit;
+    cursor:pointer;
+    transition:.18s;
+    white-space:nowrap;
+  }
+  .engine-btn:hover{ background:rgba(255,255,255,.16); }
+  .e-ico{
+    width:20px; height:20px; border-radius:6px;
+    display:inline-flex; align-items:center; justify-content:center;
+    font-size:11px; font-weight:700; color:#fff;
+    flex:0 0 auto;
+  }
+  .chev{ width:11px; height:11px; opacity:.65; transition:transform .2s; }
+  .engine.open .chev{ transform:rotate(180deg); }
+
+  .engine-menu{
+    position:absolute; top:calc(100% + 10px); right:0;
+    min-width:190px;
+    padding:6px;
+    border-radius:14px;
+    background:var(--glass-strong);
+    border:1px solid var(--line);
+    backdrop-filter:blur(24px) saturate(150%);
+    -webkit-backdrop-filter:blur(24px) saturate(150%);
+    box-shadow:0 20px 50px rgba(0,0,0,.5);
+    display:none;
+    z-index:30;
+  }
+  .engine.open .engine-menu{ display:block; animation:pop .16s ease-out; }
+  @keyframes pop{ from{ opacity:0; transform:translateY(-6px) scale(.98); } to{ opacity:1; transform:none; } }
+  .e-item{
+    display:flex; align-items:center; gap:10px;
+    width:100%; padding:9px 10px;
+    border:none; border-radius:9px;
+    background:transparent; color:var(--text);
+    font-size:13.5px; font-family:inherit; text-align:left;
+    cursor:pointer; transition:.14s;
+  }
+  .e-item:hover{ background:rgba(255,255,255,.1); }
+  .e-item.active{ background:rgba(79,156,249,.18); }
+  .e-item.active .e-name{ color:#a9cdff; font-weight:600; }
+
+  .go{
+    flex:0 0 auto;
+    width:42px; height:42px;
+    border-radius:50%;
+    border:none; cursor:pointer;
+    background:linear-gradient(160deg,#5aa6ff,#2f7ce0);
+    color:#fff;
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 6px 18px rgba(47,124,224,.45);
+    transition:.18s;
+  }
+  .go:hover{ transform:translateY(-1px); box-shadow:0 9px 22px rgba(47,124,224,.6); }
+  .go:active{ transform:scale(.95); }
+  .go svg{ width:19px; height:19px; }
+
+  /* 建议下拉 */
+  .suggest{
+    position:absolute; top:calc(100% + 10px); left:0; right:0;
+    border-radius:16px;
+    background:var(--glass-strong);
+    border:1px solid var(--line);
+    backdrop-filter:blur(24px) saturate(150%);
+    -webkit-backdrop-filter:blur(24px) saturate(150%);
+    box-shadow:0 24px 60px rgba(0,0,0,.5);
+    overflow:hidden;
+    display:none;
+    z-index:25;
+    text-align:left;
+  }
+  .suggest.show{ display:block; animation:pop .14s ease-out; }
+  .s-item{
+    display:flex; align-items:center; gap:11px;
+    padding:11px 17px;
+    font-size:14.5px;
+    color:rgba(255,255,255,.88);
+    cursor:pointer;
+    transition:background .1s;
+  }
+  .s-item:hover, .s-item.active{ background:rgba(255,255,255,.1); color:#fff; }
+  .s-item svg{ width:15px; height:15px; opacity:.45; flex:0 0 auto; }
+  .s-item .s-text{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .s-head{
+    padding:9px 17px 6px;
+    font-size:11.5px; letter-spacing:1px;
+    color:rgba(255,255,255,.4);
+  }
+  .s-del{
+    margin-left:auto; font-size:11px; color:rgba(255,255,255,.35);
+    padding:2px 6px; border-radius:6px;
+  }
+  .s-del:hover{ color:#ff8b8b; background:rgba(255,255,255,.08); }
+
+  /* =========================================================
+     设置面板
+     ========================================================= */
+  .settings-overlay{
+    position:fixed; inset:0; z-index:130;
+    background:rgba(0,0,0,.5);
+    backdrop-filter:blur(5px);
+    -webkit-backdrop-filter:blur(5px);
+    opacity:0; visibility:hidden;
+    transition: opacity .24s ease, visibility .24s ease;
+  }
+  .settings-overlay.open{ opacity:1; visibility:visible; }
+  .settings-panel{
+    position:absolute; top:0; right:0; bottom:0;
+    width:min(420px, 100%);
+    background: linear-gradient(180deg, #121a24 0%, #0d141c 100%);
+    border-left:1px solid var(--line);
+    box-shadow:-24px 0 60px rgba(0,0,0,.5);
+    transform: translateX(100%);
+    transition: transform .3s cubic-bezier(.2,.8,.25,1);
+    display:flex; flex-direction:column;
+    overflow-y:auto;
+  }
+  .settings-overlay.open .settings-panel{ transform:none; }
+
+  .settings-head{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:20px 22px;
+    border-bottom:1px solid var(--line-soft);
+    flex:0 0 auto;
+    position:sticky; top:0;
+    background:linear-gradient(180deg, #121a24 70%, rgba(18,26,36,.92));
+    backdrop-filter:blur(10px);
+    z-index:2;
+  }
+  .settings-head h2{ margin:0; font-size:17px; font-weight:650; letter-spacing:.3px; }
+  .close-x{
+    width:32px; height:32px; border-radius:50%;
+    display:inline-flex; align-items:center; justify-content:center;
+    background:rgba(255,255,255,.08);
+    border:1px solid var(--line-soft);
+    color:var(--muted);
+    font-size:18px; line-height:1;
+    cursor:pointer; transition:.15s;
+  }
+  .close-x:hover{ background:rgba(255,255,255,.16); color:#fff; }
+
+  .settings-body{ padding:4px 22px 44px; }
+  .set-group{ padding:18px 0; border-bottom:1px solid var(--line-soft); }
+  .set-group:last-child{ border-bottom:none; }
+  .set-group-title{
+    font-size:11.5px; letter-spacing:1.2px; text-transform:uppercase;
+    color:var(--muted); font-weight:600; margin-bottom:12px;
+  }
+  .set-row{
+    display:flex; align-items:center; justify-content:space-between;
+    gap:16px; padding:7px 0;
+  }
+  .set-label{ font-size:14px; font-weight:550; }
+  .set-desc{ font-size:12px; color:var(--muted); margin-top:3px; line-height:1.5; }
+  .set-btn{
+    flex:0 0 auto;
+    padding:8px 14px; border-radius:8px;
+    background:rgba(255,255,255,.08);
+    border:1px solid var(--line-soft);
+    color:var(--text); font-size:12.5px; font-family:inherit;
+    cursor:pointer; transition:.15s;
+    white-space:nowrap;
+  }
+  .set-btn:hover{ background:rgba(255,255,255,.16); }
+  .set-btn:disabled{ opacity:.55; cursor:default; }
+  .set-btn.primary{
+    background:linear-gradient(160deg,#5aa6ff,#2f7ce0);
+    border-color:transparent; color:#fff;
+  }
+  .set-btn.primary:hover{ filter:brightness(1.08); }
+  .set-btn.danger{ color:#fda4a4; border-color:rgba(239,68,68,.35); }
+  .set-btn.danger:hover{ background:rgba(239,68,68,.15); }
+
+  .engine-grid{
+    display:grid; grid-template-columns: repeat(2, minmax(0,1fr));
+    gap:8px; margin-top:10px;
+  }
+  .engine-cell{
+    display:flex; align-items:center; gap:9px;
+    padding:10px 12px;
+    border-radius:10px;
+    background:rgba(255,255,255,.05);
+    border:1px solid var(--line-soft);
+    color:var(--text);
+    font-size:13.5px; font-family:inherit;
+    cursor:pointer; transition:.15s;
+    text-align:left;
+  }
+  .engine-cell:hover{ background:rgba(255,255,255,.1); }
+  .engine-cell.active{
+    border-color:var(--accent);
+    background:rgba(79,156,249,.15);
+  }
+  .engine-cell.active span:last-child{ color:#a9cdff; font-weight:600; }
+
+  /* 开关 */
+  .switch{ position:relative; display:inline-block; width:42px; height:24px; flex:0 0 auto; }
+  .switch input{ opacity:0; width:0; height:0; }
+  .switch span{
+    position:absolute; inset:0;
+    background:rgba(255,255,255,.18);
+    border-radius:999px; transition:.2s; cursor:pointer;
+  }
+  .switch span::before{
+    content:""; position:absolute;
+    width:18px; height:18px; left:3px; top:3px;
+    background:#fff; border-radius:50%;
+    transition:.2s; box-shadow:0 1px 4px rgba(0,0,0,.4);
+  }
+  .switch input:checked + span{ background:var(--accent); }
+  .switch input:checked + span::before{ transform:translateX(18px); }
+
+  .update-note{
+    font-size:12.5px; line-height:1.65;
+    color:var(--muted);
+    margin-top:10px;
+    word-break:break-word;
+  }
+  .update-note.ok{ color:#86efac; }
+  .update-note.new{ color:#93c5fd; }
+  .update-note.err{ color:#fca5a5; }
+  .update-note a{ color:#93c5fd; text-decoration:underline; }
+
+  .spin{
+    display:inline-block; width:12px; height:12px;
+    border:2px solid rgba(255,255,255,.3);
+    border-top-color:#fff;
+    border-radius:50%;
+    animation:spin .7s linear infinite;
+    vertical-align:-1px; margin-right:6px;
+  }
+  @keyframes spin{ to{ transform:rotate(360deg); } }
+
+  /* ---------- 页脚 ---------- */
+  footer{
+    position:fixed; bottom:0; left:0; right:0;
+    padding:14px 20px;
+    text-align:center;
+    font-size:11.5px;
+    color:rgba(255,255,255,.42);
+    text-shadow:0 1px 6px rgba(0,0,0,.6);
+    pointer-events:none;
+  }
+  footer kbd{
+    font-family:inherit;
+    background:rgba(255,255,255,.1);
+    border:1px solid rgba(255,255,255,.16);
+    padding:1px 6px; border-radius:5px;
+    font-size:11px;
+  }
+
+  @media (max-width:640px){
+    .tagline{ letter-spacing:1px; font-size:12.5px; }
+    .search-overlay{ padding:9vh 14px 30px; }
+    .searchbox{ height:54px; padding-left:14px; }
+    #q{ font-size:16px; }
+    .engine-name-text{ display:none; }
+    .engine-btn{ padding:0 8px; }
+    .go{ width:38px; height:38px; }
+    header{ padding:14px 16px; }
+    .clock b{ font-size:15px; }
+    .chips{ gap:7px; margin-top:20px; }
+    .chip{ font-size:12px; padding:6px 11px; }
+    .start-search{ height:48px; font-size:14px; }
+    .settings-head{ padding:16px 18px; }
+    .settings-body{ padding:4px 18px 40px; }
+    footer{ display:none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="bg" id="bg"></div>
+<div class="shade"></div>
+
+<!-- ================= 顶栏 ================= -->
+<header>
+  <div class="logo">moprte<span class="dot">.</span></div>
+  <div class="top-right">
+    <div class="clock" id="clock"><b>--:--</b><span>--</span></div>
+    <button class="icon-btn" id="settingsBtn" title="设置" aria-label="打开设置">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+           stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="3"></circle>
+        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+      </svg>
+    </button>
+  </div>
+</header>
+
+<!-- ================= 主页 ================= -->
+<main>
+  <div class="center">
+    <h1 class="wordmark">moprte<span class="dot">.</span></h1>
+    <p class="tagline">搜 索 全 网</p>
+
+    <!-- 点击唤出搜索窗口 -->
+    <button class="start-search" id="openSearchBtn" type="button">
+      <svg class="ss-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2" stroke-linecap="round">
+        <circle cx="11" cy="11" r="7"></circle>
+        <path d="M20.5 20.5 16.7 16.7"></path>
+      </svg>
+      <span>开始搜索</span>
+      <kbd>/</kbd>
+    </button>
+
+    <div class="chips">
+      <a class="chip" href="https://top.baidu.com/board?tab=realtime" target="_blank" rel="noopener"><i>🔥</i>百度热搜</a>
+      <a class="chip" href="https://s.weibo.com/top/summary" target="_blank" rel="noopener"><i>📈</i>微博热搜</a>
+      <a class="chip" href="https://www.zhihu.com/hot" target="_blank" rel="noopener"><i>💡</i>知乎热榜</a>
+      <a class="chip" href="https://github.com/trending" target="_blank" rel="noopener"><i>🐙</i>GitHub 趋势</a>
+      <a class="chip" href="https://www.bilibili.com/v/popular/rank/all" target="_blank" rel="noopener"><i>📺</i>B站排行</a>
+      <a class="chip" href="https://news.ycombinator.com/" target="_blank" rel="noopener"><i>🧠</i>Hacker News</a>
+    </div>
+  </div>
+</main>
+
+<!-- ================= 搜索窗口（默认隐藏） ================= -->
+<div class="search-overlay" id="searchOverlay" aria-hidden="true">
+  <div class="search-shell" role="dialog" aria-modal="true" aria-label="搜索">
+    <div class="searchbox" id="searchbox">
+      <svg class="ico-search" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2" stroke-linecap="round">
+        <circle cx="11" cy="11" r="7"></circle>
+        <path d="M20.5 20.5 16.7 16.7"></path>
+      </svg>
+
+      <input id="q" type="text" autocomplete="off" autocapitalize="off"
+             spellcheck="false" placeholder="搜索全网，或输入网址直接打开…">
+
+      <div class="engine" id="engineWrap">
+        <button class="engine-btn" id="engineBtn" type="button">
+          <span class="e-ico" id="engineIco">B</span>
+          <span class="engine-name-text" id="engineName">Bing</span>
+          <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M6 9l6 6 6-6"></path>
+          </svg>
+        </button>
+        <div class="engine-menu" id="engineMenu"></div>
+      </div>
+
+      <button class="go" id="goBtn" type="button" title="搜索 (Enter)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+             stroke-linecap="round" stroke-linejoin="round">
+          <path d="M5 12h13"></path><path d="M12.5 5.5 19 12l-6.5 6.5"></path>
+        </svg>
+      </button>
+    </div>
+
+    <div class="suggest" id="suggest"></div>
+  </div>
+</div>
+
+<!-- ================= 设置面板 ================= -->
+<div class="settings-overlay" id="settingsOverlay" aria-hidden="true">
+  <aside class="settings-panel" role="dialog" aria-modal="true" aria-label="设置">
+    <div class="settings-head">
+      <h2>设置</h2>
+      <button class="close-x" id="closeSettingsBtn" type="button" aria-label="关闭设置">×</button>
+    </div>
+
+    <div class="settings-body">
+
+      <!-- 外观 -->
+      <section class="set-group">
+        <div class="set-group-title">外观</div>
+        <div class="set-row">
+          <div>
+            <div class="set-label">背景图片</div>
+            <div class="set-desc">每天自动更换一张随机壁纸</div>
+          </div>
+          <button class="set-btn" id="changeBgBtn" type="button">换一张</button>
+        </div>
+        <div class="set-row">
+          <div>
+            <div class="set-label">显示时钟</div>
+            <div class="set-desc">在右上角显示当前时间</div>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="clockToggle" checked>
+            <span></span>
+          </label>
+        </div>
+      </section>
+
+      <!-- 搜索 -->
+      <section class="set-group">
+        <div class="set-group-title">搜索</div>
+        <div class="set-row">
+          <div>
+            <div class="set-label">默认搜索引擎</div>
+            <div class="set-desc" id="curEngineName">Bing</div>
+          </div>
+        </div>
+        <div class="engine-grid" id="engineGrid"></div>
+      </section>
+
+      <!-- 关于与更新 -->
+      <section class="set-group">
+        <div class="set-group-title">关于与更新</div>
+        <div class="set-row">
+          <div>
+            <div class="set-label">当前版本</div>
+            <div class="set-desc" id="versionText">moprte v2.1.0</div>
+          </div>
+          <button class="set-btn primary" id="checkUpdateBtn" type="button">检查更新</button>
+        </div>
+        <div class="update-note" id="updateNote"></div>
+      </section>
+
+      <!-- 数据 -->
+      <section class="set-group">
+        <div class="set-group-title">数据</div>
+        <div class="set-row">
+          <div>
+            <div class="set-label">清除本地数据</div>
+            <div class="set-desc">删除搜索历史、背景与偏好设置</div>
+          </div>
+          <button class="set-btn danger" id="clearDataBtn" type="button">清除</button>
+        </div>
+      </section>
+
+    </div>
+  </aside>
+</div>
+
+<footer>
+  按 <kbd>/</kbd> 或 <kbd>Ctrl</kbd>+<kbd>K</kbd> 打开搜索 &nbsp;·&nbsp;
+  <kbd>Enter</kbd> 当前页搜索 &nbsp;·&nbsp;
+  <kbd>Ctrl</kbd>+<kbd>Enter</kbd> 新标签页 &nbsp;·&nbsp;
+  <kbd>Esc</kbd> 关闭
+</footer>
+
+<script>
+(function () {
+  "use strict";
+
+  /* =========================================================
+     基础配置
+     ========================================================= */
+  const APP_VERSION = '2.1.0';
+
+  /**
+   * 更新源地址（可选）。
+   * 留空：使用本地模拟检查（始终提示已是最新）。
+   * 填入一个返回 JSON 的地址，例如：
+   *   https://your-site.com/moprte/version.json
+   * JSON 结构示例：
+   *   { "version": "2.2.0", "notes": "新增 XX 功能", "url": "https://..." }
+   */
+  const UPDATE_FEED_URL = '';
+
+  const ENGINES = [
+    { id:'bing',   name:'Bing',       letter:'B',  color:'#0b8a5c', url:'https://www.bing.com/search?q=' },
+    { id:'google', name:'Google',     letter:'G',  color:'#4285f4', url:'https://www.google.com/search?q=' },
+    { id:'ddg',    name:'DuckDuckGo', letter:'D',  color:'#de5833', url:'https://duckduckgo.com/?q=' },
+    { id:'baidu',  name:'百度',        letter:'百', color:'#2932e1', url:'https://www.baidu.com/s?wd=' },
+    { id:'sogou',  name:'搜狗',        letter:'搜', color:'#fb6022', url:'https://www.sogou.com/web?query=' },
+    { id:'so',     name:'360 搜索',    letter:'3',  color:'#2f9e44', url:'https://www.so.com/s?q=' }
+  ];
+
+  const KEYS = {
+    engine: 'moprte.engine',
+    history: 'moprte.history',
+    bgSeed: 'moprte.bgseed',
+    showClock: 'moprte.showClock'
+  };
+
+  const state = {
+    engine: localStorage.getItem(KEYS.engine) || 'bing'
+  };
+  if (!ENGINES.some(e => e.id === state.engine)) state.engine = 'bing';
+
+  const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+  /* =========================================================
+     DOM 引用
+     ========================================================= */
+  const bgEl            = document.getElementById('bg');
+  const clockEl         = document.getElementById('clock');
+  const settingsBtn     = document.getElementById('settingsBtn');
+  const openSearchBtn   = document.getElementById('openSearchBtn');
+
+  const searchOverlay   = document.getElementById('searchOverlay');
+  const input           = document.getElementById('q');
+  const goBtn           = document.getElementById('goBtn');
+  const engineWrap      = document.getElementById('engineWrap');
+  const engineBtn       = document.getElementById('engineBtn');
+  const engineMenu      = document.getElementById('engineMenu');
+  const engineIco       = document.getElementById('engineIco');
+  const engineName      = document.getElementById('engineName');
+  const suggestEl       = document.getElementById('suggest');
+
+  const settingsOverlay = document.getElementById('settingsOverlay');
+  const closeSettingsBtn= document.getElementById('closeSettingsBtn');
+  const changeBgBtn     = document.getElementById('changeBgBtn');
+  const clockToggle     = document.getElementById('clockToggle');
+  const engineGrid      = document.getElementById('engineGrid');
+  const curEngineName   = document.getElementById('curEngineName');
+  const versionText     = document.getElementById('versionText');
+  const checkUpdateBtn  = document.getElementById('checkUpdateBtn');
+  const updateNote      = document.getElementById('updateNote');
+  const clearDataBtn    = document.getElementById('clearDataBtn');
+
+  /* =========================================================
+     时钟
+     ========================================================= */
+  const WEEK = ['周日','周一','周二','周三','周四','周五','周六'];
+
+  function tick() {
+    const d = new Date();
+    const hh = String(d.getHours()).padStart(2, '0');
+    const mm = String(d.getMinutes()).padStart(2, '0');
+    const dateStr = `${d.getMonth() + 1}月${d.getDate()}日 ${WEEK[d.getDay()]}`;
+    clockEl.innerHTML = `<b>${hh}:${mm}</b><span>${dateStr}</span>`;
+  }
+  tick();
+  setInterval(tick, 15000);
+
+  function applyClockPref() {
+    const show = localStorage.getItem(KEYS.showClock) !== '0';
+    clockEl.style.display = show ? '' : 'none';
+    clockToggle.checked = show;
+  }
+  applyClockPref();
+
+  clockToggle.addEventListener('change', () => {
+    localStorage.setItem(KEYS.showClock, clockToggle.checked ? '1' : '0');
+    applyClockPref();
+  });
+
+  /* =========================================================
+     背景
+     ========================================================= */
+  function loadBg(seed) {
+    const url = `https://picsum.photos/seed/${encodeURIComponent(seed)}/1920/1080`;
+    const img = new Image();
+    img.onload = () => { bgEl.style.backgroundImage = `url("${url}")`; };
+    img.onerror = () => { /* 保留渐变兜底 */ };
+    img.src = url;
+  }
+
+  function randomSeed() {
+    return Math.random().toString(36).slice(2, 10);
+  }
+
+  (function initBg() {
+    let seed = localStorage.getItem(KEYS.bgSeed);
+    if (!seed) {
+      seed = 'd' + new Date().toISOString().slice(0, 10).replace(/-/g, '');
+      localStorage.setItem(KEYS.bgSeed, seed);
+    }
+    loadBg(seed);
+  })();
+
+  changeBgBtn.addEventListener('click', () => {
+    const seed = randomSeed();
+    localStorage.setItem(KEYS.bgSeed, seed);
+    bgEl.style.backgroundImage = 'none';
+    loadBg(seed);
+    changeBgBtn.textContent = '已更换';
+    setTimeout(() => { changeBgBtn.textContent = '换一张'; }, 1200);
+  });
+
+  /* =========================================================
+     搜索引擎
+     ========================================================= */
+  function buildMenu() {
+    engineMenu.innerHTML = '';
+    ENGINES.forEach(e => {
+      const item = document.createElement('button');
+      item.type = 'button';
+      item.className = 'e-item' + (e.id === state.engine ? ' active' : '');
+      item.innerHTML =
+        `<span class="e-ico" style="background:${e.color}">${e.letter}</span>` +
+        `<span class="e-name">${e.name}</span>`;
+      item.addEventListener('click', () => {
+        setEngine(e.id);
+        engineWrap.classList.remove('open');
+        input.focus();
+      });
+      engineMenu.appendChild(item);
+    });
+  }
+
+  function buildEngineGrid() {
+    engineGrid.innerHTML = '';
+    ENGINES.forEach(e => {
+      const cell = document.createElement('button');
+      cell.type = 'button';
+      cell.className = 'engine-cell' + (e.id === state.engine ? ' active' : '');
+      cell.innerHTML =
+        `<span class="e-ico" style="background:${e.color}">${e.letter}</span>` +
+        `<span>${e.name}</span>`;
+      cell.addEventListener('click', () => setEngine(e.id));
+      engineGrid.appendChild(cell);
+    });
+  }
+
+  function setEngine(id) {
+    state.engine = id;
+    localStorage.setItem(KEYS.engine, id);
+
+    const e = ENGINES.find(x => x.id === id) || ENGINES[0];
+    engineIco.textContent = e.letter;
+    engineIco.style.background = e.color;
+    engineName.textContent = e.name;
+    curEngineName.textContent = e.name;
+
+    buildMenu();
+    buildEngineGrid();
+  }
+
+  engineBtn.addEventListener('click', (ev) => {
+    ev.stopPropagation();
+    engineWrap.classList.toggle('open');
+  });
+  document.addEventListener('click', (ev) => {
+    if (!engineWrap.contains(ev.target)) engineWrap.classList.remove('open');
+  });
+
+  setEngine(state.engine);
+
+  /* =========================================================
+     搜索窗口：打开 / 关闭
+     ========================================================= */
+  function openSearch() {
+    if (searchOverlay.classList.contains('open')) {
+      input.focus();
+      return;
+    }
+    if (settingsOverlay.classList.contains('open')) closeSettings();
+
+    searchOverlay.classList.add('open');
+    searchOverlay.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('locked');
+
+    input.value = '';
+    hideSuggest();
+    setTimeout(() => input.focus({ preventScroll: true }), 90);
+  }
+
+  function closeSearch() {
+    searchOverlay.classList.remove('open');
+    searchOverlay.setAttribute('aria-hidden', 'true');
+    if (!settingsOverlay.classList.contains('open')) {
+      document.body.classList.remove('locked');
+    }
+    hideSuggest();
+    input.blur();
+  }
+
+  openSearchBtn.addEventListener('click', openSearch);
+
+  searchOverlay.addEventListener('mousedown', (ev) => {
+    if (ev.target === searchOverlay) closeSearch();
+  });
+
+  /* =========================================================
+     设置面板：打开 / 关闭
+     ========================================================= */
+  function openSettings() {
+    if (searchOverlay.classList.contains('open')) closeSearch();
+
+    settingsOverlay.classList.add('open');
+    settingsOverlay.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('locked');
+
+    // 打开时重置更新提示区（保留上次结果也可以，这里保留）
+    void settingsOverlay.offsetWidth;
+  }
+
+  function closeSettings() {
+    settingsOverlay.classList.remove('open');
+    settingsOverlay.setAttribute('aria-hidden', 'true');
+    if (!searchOverlay.classList.contains('open')) {
+      document.body.classList.remove('locked');
+    }
+  }
+
+  settingsBtn.addEventListener('click', openSettings);
+  closeSettingsBtn.addEventListener('click', closeSettings);
+
+  settingsOverlay.addEventListener('mousedown', (ev) => {
+    if (ev.target === settingsOverlay) closeSettings();
+  });
+
+  /* =========================================================
+     搜索历史
+     ========================================================= */
+  function getHistory() {
+    try {
+      const arr = JSON.parse(localStorage.getItem(KEYS.history) || '[]');
+      return Array.isArray(arr) ? arr : [];
+    } catch (e) { return []; }
+  }
+
+  function pushHistory(term) {
+    let arr = getHistory().filter(t => t !== term);
+    arr.unshift(term);
+    arr = arr.slice(0, 8);
+    try { localStorage.setItem(KEYS.history, JSON.stringify(arr)); } catch (e) {}
+  }
+
+  /* =========================================================
+     搜索建议
+     ========================================================= */
+  let suggestTimer = null;
+  let activeIndex = -1;
+  let currentItems = [];
+  let suggestToken = 0;
+
+  function hideSuggest() {
+    suggestEl.classList.remove('show');
+    suggestEl.innerHTML = '';
+    activeIndex = -1;
+    currentItems = [];
+  }
+
+  function renderList(items, opts) {
+    opts = opts || {};
+    suggestEl.innerHTML = '';
+
+    if (opts.title) {
+      const head = document.createElement('div');
+      head.className = 's-head';
+      head.textContent = opts.title;
+      suggestEl.appendChild(head);
+    }
+
+    items.forEach((text, idx) => {
+      const row = document.createElement('div');
+      row.className = 's-item';
+      row.dataset.index = idx;
+
+      const icon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      icon.setAttribute('viewBox', '0 0 24 24');
+      icon.setAttribute('fill', 'none');
+      icon.setAttribute('stroke', 'currentColor');
+      icon.setAttribute('stroke-width', '2');
+      icon.setAttribute('stroke-linecap', 'round');
+
+      const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      circle.setAttribute('cx', '11');
+      circle.setAttribute('cy', '11');
+      circle.setAttribute('r', '7');
+      icon.appendChild(circle);
+
+      const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      if (opts.history) {
+        path.setAttribute('d', 'M12 7v5l3 2');
+        circle.setAttribute('cx', '12');
+        circle.setAttribute('cy', '12');
+        circle.setAttribute('r', '8.5');
+      } else {
+        path.setAttribute('d', 'M20.5 20.5 16.7 16.7');
+      }
+      icon.appendChild(path);
+      row.appendChild(icon);
+
+      const span = document.createElement('span');
+      span.className = 's-text';
+      span.textContent = text;
+      row.appendChild(span);
+
+      if (opts.history) {
+        const del = document.createElement('span');
+        del.className = 's-del';
+        del.textContent = '删除';
+        del.addEventListener('mousedown', (ev) => {
+          ev.preventDefault();
+          ev.stopPropagation();
+          const arr = getHistory().filter(t => t !== text);
+          try { localStorage.setItem(KEYS.history, JSON.stringify(arr)); } catch (e) {}
+          if (arr.length) renderList(arr, { title: '最近搜索', history: true });
+          else hideSuggest();
+        });
+        row.appendChild(del);
+      }
+
+      row.addEventListener('mousedown', (ev) => {
+        ev.preventDefault();
+        commit(text);
+      });
+
+      suggestEl.appendChild(row);
+    });
+
+    currentItems = items;
+    activeIndex = -1;
+    suggestEl.classList.add('show');
+  }
+
+  function highlightActive() {
+    const rows = suggestEl.querySelectorAll('.s-item');
+    rows.forEach((r, i) => r.classList.toggle('active', i === activeIndex));
+  }
+
+  function jsonp(url, cb, timeout) {
+    timeout = timeout || 2200;
+    const name = '__moprte_cb_' + Math.random().toString(36).slice(2);
+    let finished = false;
+
+    const script = document.createElement('script');
+    const timer = setTimeout(() => {
+      if (finished) return;
+      finished = true;
+      cleanup();
+      cb(null);
+    }, timeout);
+
+    function cleanup() {
+      clearTimeout(timer);
+      try { delete window[name]; } catch (e) { window[name] = undefined; }
+      if (script.parentNode) script.parentNode.removeChild(script);
+    }
+
+    window[name] = function (data) {
+      if (finished) return;
+      finished = true;
+      cleanup();
+      cb(data);
+    };
+
+    script.onerror = function () {
+      if (finished) return;
+      finished = true;
+      cleanup();
+      cb(null);
+    };
+
+    script.src = url + (url.indexOf('?') >= 0 ? '&' : '?') + 'jsonp=' + name;
+    document.head.appendChild(script);
+  }
+
+  function fetchSuggest(keyword) {
+    const token = ++suggestToken;
+    jsonp('https://api.bing.com/osjson.aspx?query=' + encodeURIComponent(keyword), (data) => {
+      if (token !== suggestToken) return;
+      if (input.value.trim() !== keyword) return;
+      const list = Array.isArray(data) && Array.isArray(data[1]) ? data[1] : null;
+      if (list && list.length) {
+        renderList(list.slice(0, 8).filter(Boolean), {});
+      } else {
+        hideSuggest();
+      }
+    });
+  }
+
+  input.addEventListener('input', () => {
+    clearTimeout(suggestTimer);
+    const keyword = input.value.trim();
+    if (!keyword) {
+      showHistoryOrHide();
+      return;
+    }
+    suggestTimer = setTimeout(() => fetchSuggest(keyword), 160);
+  });
+
+  input.addEventListener('focus', () => {
+    if (!input.value.trim()) showHistoryOrHide();
+  });
+
+  function showHistoryOrHide() {
+    const hist = getHistory();
+    if (hist.length) renderList(hist, { title: '最近搜索', history: true });
+    else hideSuggest();
+  }
+
+  /* =========================================================
+     键盘交互
+     ========================================================= */
+  input.addEventListener('keydown', (ev) => {
+    const open = suggestEl.classList.contains('show');
+    const count = currentItems.length;
+
+    if (ev.key === 'ArrowDown') {
+      if (!open || !count) return;
+      ev.preventDefault();
+      activeIndex = (activeIndex + 1) % count;
+      highlightActive();
+    } else if (ev.key === 'ArrowUp') {
+      if (!open || !count) return;
+      ev.preventDefault();
+      activeIndex = (activeIndex - 1 + count) % count;
+      highlightActive();
+    } else if (ev.key === 'Enter') {
+      ev.preventDefault();
+      const newTab = ev.ctrlKey || ev.metaKey;
+      if (open && activeIndex >= 0 && currentItems[activeIndex]) {
+        commit(currentItems[activeIndex], newTab);
+      } else {
+        commit(input.value, newTab);
+      }
+    }
+    // Esc 交给全局处理（关闭搜索窗口）
+  });
+
+  document.addEventListener('keydown', (ev) => {
+    const searchOpen   = searchOverlay.classList.contains('open');
+    const settingsOpen = settingsOverlay.classList.contains('open');
+    const key = (ev.key || '').toLowerCase();
+    const meta = ev.ctrlKey || ev.metaKey;
+
+    // Esc：优先关闭最上层
+    if (ev.key === 'Escape') {
+      if (searchOpen) { ev.preventDefault(); closeSearch(); return; }
+      if (settingsOpen) { ev.preventDefault(); closeSettings(); return; }
+      return;
+    }
+
+    // Ctrl/Cmd + K：打开搜索
+    if (meta && key === 'k') {
+      ev.preventDefault();
+      if (settingsOpen) closeSettings();
+      openSearch();
+      return;
+    }
+
+    // "/"：打开搜索（不在输入框内、且无面板打开时）
+    if (ev.key === '/' && !searchOpen && !settingsOpen) {
+      const ae = document.activeElement;
+      const tag = ae && ae.tagName ? ae.tagName.toLowerCase() : '';
+      if (tag === 'input' || tag === 'textarea' || (ae && ae.isContentEditable)) return;
+      ev.preventDefault();
+      openSearch();
+    }
+  });
+
+  /* =========================================================
+     执行搜索
+     ========================================================= */
+  const URL_RE = /^(https?:\/\/)?([a-zA-Z0-9\u4e00-\u9fa5-]+\.)+[a-zA-Z]{2,}(:\d{1,5})?(\/[^\s]*)?$/i;
+
+  function looksLikeUrl(text) {
+    if (/\s/.test(text)) return false;
+    if (!URL_RE.test(text)) return false;
+    return /[a-zA-Z\u4e00-\u9fa5]{2,}/.test(text);
+  }
+
+  function commit(text, newTab) {
+    if (typeof text !== 'string') return;
+    text = text.trim();
+    if (!text) return;
+    hideSuggest();
+    doSearch(text, newTab);
+  }
+
+  function doSearch(term, newTab) {
+    let url;
+    if (looksLikeUrl(term)) {
+      url = /^https?:\/\//i.test(term) ? term : 'http://' + term;
+    } else {
+      const eng = ENGINES.find(e => e.id === state.engine) || ENGINES[0];
+      url = eng.url + encodeURIComponent(term);
+      pushHistory(term);
+    }
+
+    closeSearch();
+
+    if (newTab) {
+      window.open(url, '_blank', 'noopener');
+    } else {
+      window.location.href = url;
+    }
+  }
+
+  goBtn.addEventListener('click', () => commit(input.value, false));
+
+  document.addEventListener('click', (ev) => {
+    if (!suggestEl.contains(ev.target) && ev.target !== input) hideSuggest();
+  });
+
+  /* =========================================================
+     检查更新
+     ========================================================= */
+  function cmpVersion(a, b) {
+    const pa = String(a || '0').split('.').map(n => parseInt(n, 10) || 0);
+    const pb = String(b || '0').split('.').map(n => parseInt(n, 10) || 0);
+    const len = Math.max(pa.length, pb.length);
+    for (let i = 0; i < len; i++) {
+      const x = pa[i] || 0;
+      const y = pb[i] || 0;
+      if (x > y) return 1;
+      if (x < y) return -1;
+    }
+    return 0;
+  }
+
+  function timeNow() {
+    const d = new Date();
+    return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+  }
+
+  function setUpdateNote(type, html) {
+    updateNote.className = 'update-note' + (type ? ' ' + type : '');
+    updateNote.innerHTML = html || '';
+  }
+
+  let checking = false;
+
+  async function doCheckUpdate() {
+    if (checking) return;
+    checking = true;
+
+    checkUpdateBtn.disabled = true;
+    checkUpdateBtn.innerHTML = '<span class="spin"></span>检查中…';
+    setUpdateNote('', '');
+
+    let result = 'latest';
+    let remote = null;
+
+    try {
+      if (!UPDATE_FEED_URL) {
+        // 本地模拟检查
+        await sleep(1100);
+        result = 'latest';
+      } else {
+        const res = await fetch(UPDATE_FEED_URL + (UPDATE_FEED_URL.indexOf('?') >= 0 ? '&' : '?') + 't=' + Date.now(), {
+          cache: 'no-store'
+        });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        remote = await res.json();
+        const rv = remote && remote.version ? String(remote.version) : '';
+        result = rv && cmpVersion(rv, APP_VERSION) > 0 ? 'new' : 'latest';
+      }
+    } catch (err) {
+      result = 'error';
+    }
+
+    checking = false;
+    checkUpdateBtn.disabled = false;
+    checkUpdateBtn.textContent = '检查更新';
+
+    if (result === 'latest') {
+      setUpdateNote('ok', `已是最新版本（v${APP_VERSION}）· 检查于 ${timeNow()}`);
+    } else if (result === 'new') {
+      const rv = remote && remote.version ? remote.version : '';
+      const notes = remote && remote.notes ? String(remote.notes) : '';
+      let html = `发现新版本 v${rv}`;
+      if (notes) html += `：${escapeHtml(notes)}`;
+      if (remote && remote.url) {
+        html += ` <a href="${escapeAttr(remote.url)}" target="_blank" rel="noopener">前往下载</a>`;
+      }
+      setUpdateNote('new', html);
+    } else {
+      setUpdateNote('err', '检查更新失败，请检查网络后重试。');
+    }
+  }
+
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, c => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    })[c]);
+  }
+  function escapeAttr(s) {
+    return escapeHtml(s).replace(/`/g, '&#96;');
+  }
+
+  checkUpdateBtn.addEventListener('click', doCheckUpdate);
+
+  /* =========================================================
+     清除本地数据
+     ========================================================= */
+  clearDataBtn.addEventListener('click', () => {
+    const ok = window.confirm('确定清除所有本地数据（搜索历史、背景、引擎与显示设置）吗？');
+    if (!ok) return;
+    try {
+      localStorage.removeItem(KEYS.history);
+      localStorage.removeItem(KEYS.bgSeed);
+      localStorage.removeItem(KEYS.engine);
+      localStorage.removeItem(KEYS.showClock);
+    } catch (e) {}
+    window.location.reload();
+  });
+
+  /* =========================================================
+     初始化
+     ========================================================= */
+  versionText.textContent = `moprte v${APP_VERSION}`;
+  setUpdateNote('', '检查是否有新版本可用。');
+
+  // 预生成设置里的引擎网格（setEngine 已调用过，这里保证存在）
+  if (!engineGrid.children.length) buildEngineGrid();
+
+  // 不自动聚焦输入框：搜索窗口默认关闭，由用户点击或快捷键唤出
+})();
+</script>
+</body>
+</html>
